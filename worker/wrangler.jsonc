@@ -1,0 +1,38 @@
+// Garden API — a stateless proxy between the Garden app and Pluggy (DESIGN.md §13).
+// It stores no financial data: KV holds only the item whitelist, device token hashes,
+// the ingestion lease, item fingerprints and the CNPJ cache.
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "garden-api",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-08-22",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"workers_dev": true,
+	"kv_namespaces": [
+		// No id: `wrangler deploy` provisions the namespace on first deploy.
+		{
+			"binding": "GARDEN",
+			"id": "62bdb5065fd24e159ebe4c378f931ed6"
+		}
+	],
+	"triggers": {
+		// Hourly: has any Meu Pluggy item refreshed? If so, ping the app.
+		"crons": [
+			"0 * * * *"
+		]
+	},
+	"vars": {
+		"PLUGGY_API_BASE": "https://api.pluggy.ai",
+		"CNPJ_API_BASE": "https://brasilapi.com.br/api/cnpj/v1",
+		"APNS_TOPIC": "",
+		"APNS_ENVIRONMENT": "production"
+	},
+	// Secrets (wrangler secret put …): PLUGGY_CLIENT_ID, PLUGGY_CLIENT_SECRET, ADMIN_TOKEN,
+	// and optionally APNS_KEY_P8, APNS_KEY_ID, APNS_TEAM_ID for silent pushes.
+	"observability": {
+		"enabled": true,
+		"head_sampling_rate": 1
+	}
+}

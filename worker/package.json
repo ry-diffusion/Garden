@@ -1,0 +1,20 @@
+{
+  "name": "garden-api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --port 8787",
+    "dev:mock-pluggy": "node dev/mock-pluggy.mjs",
+    "deploy": "wrangler deploy",
+    "types": "wrangler types",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "pair": "node dev/pair.mjs"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.22.0",
+    "typescript": "^5.9.0",
+    "vitest": "~4.1.0",
+    "wrangler": "^4.147.0"
+  }
+}

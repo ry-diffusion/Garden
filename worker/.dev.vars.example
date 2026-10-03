@@ -1,0 +1,6 @@
+# Copy to .dev.vars for `npm run dev`. Never commit .dev.vars.
+PLUGGY_CLIENT_ID=your-client-id
+PLUGGY_CLIENT_SECRET=your-client-secret
+ADMIN_TOKEN=a-long-random-string
+# To develop against the local mock instead of the real Pluggy:
+# PLUGGY_API_BASE=http://127.0.0.1:8788
