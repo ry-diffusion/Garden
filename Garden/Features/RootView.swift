@@ -27,7 +27,19 @@ struct RootView: View {
             }
         }
         .tabViewStyle(.sidebarAdaptable)
-        .task { await Ledger(context: context).enrichPendingMerchants() }
+        .task {
+            WidgetPublisher.shared.start()
+            await Ledger(context: context).enrichPendingMerchants()
+        }
+        .onOpenURL { url in
+            // garden://add · garden://home · garden://categories — from widgets and the Lançar control.
+            guard url.scheme == "garden" else { return }
+            switch url.host() {
+            case "add": router.presentAdd()
+            case "categories": router.tab = .planning
+            default: router.tab = .home
+            }
+        }
         .onChange(of: scenePhase, initial: true) { _, phase in
             if phase == .active { Task { await SyncEngine.shared.syncIfStale() } }
         }

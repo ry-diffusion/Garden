@@ -38,6 +38,7 @@ A maioria dos apps de finanças mostra "PAG*JOSE" ou "MP*LOJA" e para por aí. O
 | **Buscar** | "Quanto gastei no iFood neste ciclo?" |
 | **Salário** | Marque o pagador uma vez: o Garden reconhece os próximos e sugere o dia em que seu mês começa |
 | **Captura automática** | App Intent para o Atalhos: compra no Apple Pay e notificações do Nubank e do BTG |
+| **Widgets** | Sobra do mês (pequeno, médio e na tela bloqueada), Para onde foi o dinheiro (médio e grande) e o controle "Lançar" na Central de Controle |
 
 ## Como começar
 
@@ -51,6 +52,8 @@ Sem bancos conectados, o Garden também funciona só com lançamentos manuais e 
 
 ```
 Garden/            app SwiftUI (iPhone, iPad, Mac)
+GardenWidgets/     widgets e o controle "Lançar" (WidgetKit)
+Shared/            o resumo que o app grava para os widgets (App Group)
   Ledger/          regras de dinheiro: categorização, marcas, CNPJ, notificações
   Sync/            sincronização com o Worker e o Pluggy
   Features/        telas

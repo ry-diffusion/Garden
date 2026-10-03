@@ -631,6 +631,16 @@ Still open: deploying to your Cloudflare account and connecting real Meu Pluggy 
 - **Salary:** "Marcar como salário" remembers the payer (CNPJ or person) and offers the cycle start day. "Sobra do mês" can be *Pelo salário* (salary + other income − all spending) or *Pelos limites*.
 - Open Finance descriptions arrive as `Operação|Contraparte` and are split into payment method + counterpart. Pluggy's generic "Transfers" category is not treated as a transfer between my own accounts.
 
+### Widgets (2026-10-03)
+
+- **Extension:** `GardenWidgets`. The app writes a small `WidgetSnapshot` (Sobra, baseline, spent, top categories) to the App Group `group.br.com.zesmoi.Garden`, debounced after every store save and every settings change. The widget never opens the SwiftData store.
+- **Widgets:**
+  - **Sobra do mês:** small, medium (with top categories and "Lançar"), and lock screen circular, rectangular and inline.
+  - **Para onde foi o dinheiro:** medium (ring) and large (ring, Sobra, top 5 categories).
+  - **Control:** "Lançar" for Control Center and the Lock Screen.
+- **Links:** `garden://add`, `garden://home` and `garden://categories`, handled in `RootView.onOpenURL`.
+- **Timeline:** rolls over at midnight. The app reloads it whenever the numbers change.
+
 ## 19. Decisions (answered 2026-10-03)
 
 | Question | Answer | Consequence |

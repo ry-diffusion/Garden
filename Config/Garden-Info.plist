@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- garden://add, garden://home… — opened by widgets and the Lançar control. Merged with the generated Info.plist. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>br.com.zesmoi.Garden</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>garden</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

@@ -76,49 +76,12 @@ private struct HomeContent: View {
 
     /// Income mode (salary) → plan mode (category limits) → plain "spent vs. last cycle".
     private func figures(_ math: CategoryMath) -> SobraFigures {
-        let previousSpending = previousMovements.filter(\.countsAsSpending)
-        if sobraMode == .cap, capCents > 0 {
-            let cap = Money(cents: Int64(capCents))
-            return SobraFigures(title: "Sobra do mês", amount: cap - math.totalSpent, baseline: cap, spent: math.totalSpent,
-                                counted: math.movements, previous: [],
-                                caption: "Teto de \(cap.formattedWhole) · gasto \(math.totalSpent.formattedWhole)", captionSymbol: "gauge.with.needle")
-        }
-        if sobraMode == .income {
-            let expected = Ledger(context: context).salary(in: cycle.previous())
-            let baseline = math.incomeBaseline(expectedSalary: expected)
-            if baseline.cents > 0 {
-                let caption = math.salaryReceived.cents > 0
-                    ? "Salário recebido: \(math.salaryReceived.formattedWhole)"
-                    : (expected.cents > 0 ? "Salário previsto: \(expected.formattedWhole) (ciclo anterior)" : nil)
-                return SobraFigures(title: "Sobra do mês", amount: math.incomeSobra(expectedSalary: expected), baseline: baseline,
-                                    spent: math.totalSpent, counted: math.movements, previous: [], caption: caption, captionSymbol: "briefcase")
-            }
-        }
-        if math.hasLimits {
-            return SobraFigures(title: "Sobra do mês", amount: math.sobra, baseline: math.totalLimit, spent: math.spentInLimited,
-                                counted: math.limitedMovements, previous: [], caption: nil, captionSymbol: "chart.pie")
-        }
-        return SobraFigures(title: "Gasto no ciclo", amount: math.totalSpent, baseline: nil, spent: math.totalSpent,
-                            counted: math.movements, previous: previousSpending,
-                            caption: sobraMode == .income ? "Marque seu salário para ver quanto sobra" : nil, captionSymbol: "briefcase")
+        SobraFigures.make(math: math, cycle: cycle, mode: sobraMode, capCents: capCents,
+                          previousMovements: previousMovements, context: context)
     }
 }
 
 // MARK: - Hero
-
-private struct SobraFigures {
-    let title: LocalizedStringKey
-    let amount: Money
-    /// Limits or expected income; nil = compare with the previous cycle instead.
-    let baseline: Money?
-    let spent: Money
-    let counted: [Movement]
-    let previous: [Movement]
-    let caption: String?
-    let captionSymbol: String
-
-    var isSobra: Bool { baseline != nil }
-}
 
 private struct SobraHero: View {
     let figures: SobraFigures
