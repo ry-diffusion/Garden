@@ -106,15 +106,24 @@ struct LogPaymentIntent: AppIntent {
         var text = "\(movement.amount.magnitude.formatted) · \(movement.displayTitle)"
         if movement.kind == .transfer { return text + " → Entre minhas contas" }
         if movement.kind == .income { return "+" + text }
-        guard let category = movement.category else { return text }
-        text += " → \(category.name)"
-        if category.limit != nil {
+        if let category = movement.category {
+            text += " → \(category.name)"
+            if category.limit != nil {
+                let cycle = Preferences.currentCycle
+                let start = cycle.start, end = cycle.end
+                let movements = (try? context.fetch(FetchDescriptor<Movement>(predicate: #Predicate { $0.date >= start && $0.date < end }))) ?? []
+                if let remaining = CategoryMath(cycle: cycle, categories: [category], movements: movements).remaining(in: category) {
+                    text += " (\(remaining.formattedWhole) restantes)"
+                }
+            }
+        }
+        // "R$ 45,90 · Padaria → Comer fora (R$ 210 restantes) · R$ 1.840 no teto do mês"
+        if let cap = Preferences.monthlyCap, movement.countsAsSpending {
             let cycle = Preferences.currentCycle
             let start = cycle.start, end = cycle.end
             let movements = (try? context.fetch(FetchDescriptor<Movement>(predicate: #Predicate { $0.date >= start && $0.date < end }))) ?? []
-            if let remaining = CategoryMath(cycle: cycle, categories: [category], movements: movements).remaining(in: category) {
-                text += " (\(remaining.formattedWhole) restantes)"
-            }
+            let spent = CategoryMath(cycle: cycle, categories: [], movements: movements).totalSpent
+            text += " · \((cap - spent).formattedWhole) no teto do mês"
         }
         return text
     }

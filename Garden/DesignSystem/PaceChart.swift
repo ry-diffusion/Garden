@@ -55,7 +55,7 @@ struct PaceChart: View {
 
     private var isAhead: Bool {
         if let baseline, let last = points.last {
-            return Double(spent) > Double(baseline.cents) * cycle.elapsedFraction(at: last.date) * 1.05
+            return spent > baseline.cents || Double(spent) > Double(baseline.cents) * cycle.elapsedFraction(at: last.date) * 1.05
         }
         if let before = previousAtSamePoint { return Double(spent) > Double(before) * 1.05 }
         return false

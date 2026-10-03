@@ -25,10 +25,15 @@ struct SettingsView: View {
             } header: {
                 Text("Ciclo")
             } footer: {
-                Text("Seu mês vai do dia \(payday) até o dia \(payday == 1 ? 28 : payday - 1) do mês seguinte. "
-                     + (sobraMode == .income
-                        ? "A Sobra do mês é o salário do ciclo (ou o do ciclo anterior, até o novo cair) mais outras entradas, menos tudo o que você gastou."
-                        : "A Sobra do mês é a soma dos limites menos o que já foi gasto neles."))
+                Text("Seu mês vai do dia \(payday) até o dia \(payday == 1 ? 28 : payday - 1) do mês seguinte. " + sobraMode.explanation)
+            }
+
+            Section {
+                MonthlyCapField()
+            } header: {
+                Text("Teto do mês")
+            } footer: {
+                Text("O máximo que você quer gastar por ciclo, somando tudo. Ao definir um teto, a Sobra do mês passa a ser calculada por ele.")
             }
 
             Section {
@@ -69,6 +74,57 @@ struct SettingsView: View {
         #if os(macOS)
         .frame(width: 460, height: 420)
         #endif
+    }
+}
+
+/// "Quero gastar no máximo R$ 5.000 no mês." Setting a value switches Sobra to the cap.
+struct MonthlyCapField: View {
+    @AppStorage(Preferences.monthlyCapKey) private var capCents = 0
+    @AppStorage(Preferences.sobraModeKey) private var sobraMode: SobraMode = .plan
+    @State private var text = ""
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        LabeledContent("Gastar no máximo") {
+            TextField("Sem teto", text: $text)
+                .multilineTextAlignment(.trailing)
+                .monospacedDigit()
+                .focused($focused)
+                #if os(iOS)
+                .keyboardType(.decimalPad)
+                #endif
+                .onSubmit(save)
+                .onChange(of: focused) { _, isFocused in if !isFocused { save() } }
+        }
+        .onAppear { text = capCents > 0 ? Money(cents: Int64(capCents)).formattedWhole : "" }
+        #if os(iOS)
+        .toolbar {
+            if focused {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("OK") { focused = false }
+                }
+            }
+        }
+        #endif
+        if capCents > 0 {
+            Button("Remover teto", role: .destructive) {
+                capCents = 0
+                text = ""
+                if sobraMode == .cap { sobraMode = .plan }
+            }
+        }
+    }
+
+    private func save() {
+        let cents = Int(Money(parsing: text)?.magnitude.cents ?? 0)
+        capCents = cents
+        if cents > 0 {
+            sobraMode = .cap
+            text = Money(cents: Int64(cents)).formattedWhole
+        } else if sobraMode == .cap {
+            sobraMode = .plan
+        }
     }
 }
 

@@ -17,6 +17,7 @@ struct CategoriesView: View {
 
 private struct CategoriesContent: View {
     let cycle: PayCycle
+    @AppStorage(Preferences.monthlyCapKey) private var capCents = 0
     @Query(sort: \SpendCategory.sortOrder) private var categories: [SpendCategory]
     @Query private var cycleMovements: [Movement]
 
@@ -37,8 +38,16 @@ private struct CategoriesContent: View {
                     Text(cycleLabel)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
+                    if let cap = Preferences.monthlyCap, capCents > 0 {
+                        VStack(spacing: 6) {
+                            Text("\(math.totalSpent.formattedWhole) de \(cap.formattedWhole) do teto do mês")
+                                .font(.subheadline.weight(.medium))
+                                .monospacedDigit()
+                            BudgetBar(fraction: Double(math.totalSpent.cents) / Double(cap.cents), pace: cycle.elapsedFraction(), height: 8)
+                        }
+                    }
                     if math.hasLimits {
-                        Text("\(math.spentInLimited.formattedWhole) de \(math.totalLimit.formattedWhole) nos limites")
+                        Text("\(math.spentInLimited.formattedWhole) de \(math.totalLimit.formattedWhole) nos limites das categorias")
                             .font(.subheadline.weight(.medium))
                             .monospacedDigit()
                     }

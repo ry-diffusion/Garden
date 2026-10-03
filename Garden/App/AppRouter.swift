@@ -23,6 +23,13 @@ final class AppRouter {
 enum Preferences {
     static let paydayKey = "payday"
     static let sobraModeKey = "sobraMode"
+    /// Global spending cap per cycle, in centavos (0 = none).
+    static let monthlyCapKey = "monthlyCapCents"
+
+    static var monthlyCap: Money? {
+        let cents = UserDefaults.standard.integer(forKey: monthlyCapKey)
+        return cents > 0 ? Money(cents: Int64(cents)) : nil
+    }
 
     static var payday: Int {
         let stored = UserDefaults.standard.integer(forKey: paydayKey)
@@ -38,11 +45,22 @@ enum SobraMode: String, CaseIterable {
     case plan
     /// Salary (or last cycle's, until it lands) + other income − everything spent.
     case income
+    /// One global cap ("no máximo R$ 5.000 no mês") − everything spent.
+    case cap
 
     var label: String {
         switch self {
-        case .plan: "Pelos limites"
+        case .plan: "Pelos limites das categorias"
         case .income: "Pelo salário"
+        case .cap: "Pelo teto do mês"
+        }
+    }
+
+    var explanation: String {
+        switch self {
+        case .plan: "A Sobra do mês é a soma dos limites das categorias menos o que já foi gasto nelas."
+        case .income: "A Sobra do mês é o salário do ciclo (ou o do ciclo anterior, até o novo cair) mais outras entradas, menos tudo o que você gastou."
+        case .cap: "A Sobra do mês é o teto menos tudo o que você gastou no ciclo, em qualquer categoria."
         }
     }
 }

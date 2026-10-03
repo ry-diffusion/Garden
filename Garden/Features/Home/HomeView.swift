@@ -17,6 +17,7 @@ struct HomeView: View {
 private struct HomeContent: View {
     let cycle: PayCycle
     @AppStorage(Preferences.sobraModeKey) private var sobraMode: SobraMode = .plan
+    @AppStorage(Preferences.monthlyCapKey) private var capCents = 0
     @Environment(\.modelContext) private var context
 
     @Query(sort: \SpendCategory.sortOrder) private var categories: [SpendCategory]
@@ -76,6 +77,12 @@ private struct HomeContent: View {
     /// Income mode (salary) → plan mode (category limits) → plain "spent vs. last cycle".
     private func figures(_ math: CategoryMath) -> SobraFigures {
         let previousSpending = previousMovements.filter(\.countsAsSpending)
+        if sobraMode == .cap, capCents > 0 {
+            let cap = Money(cents: Int64(capCents))
+            return SobraFigures(title: "Sobra do mês", amount: cap - math.totalSpent, baseline: cap, spent: math.totalSpent,
+                                counted: math.movements, previous: [],
+                                caption: "Teto de \(cap.formattedWhole) · gasto \(math.totalSpent.formattedWhole)", captionSymbol: "gauge.with.needle")
+        }
         if sobraMode == .income {
             let expected = Ledger(context: context).salary(in: cycle.previous())
             let baseline = math.incomeBaseline(expectedSalary: expected)
@@ -84,16 +91,16 @@ private struct HomeContent: View {
                     ? "Salário recebido: \(math.salaryReceived.formattedWhole)"
                     : (expected.cents > 0 ? "Salário previsto: \(expected.formattedWhole) (ciclo anterior)" : nil)
                 return SobraFigures(title: "Sobra do mês", amount: math.incomeSobra(expectedSalary: expected), baseline: baseline,
-                                    spent: math.totalSpent, counted: math.movements, previous: [], caption: caption)
+                                    spent: math.totalSpent, counted: math.movements, previous: [], caption: caption, captionSymbol: "briefcase")
             }
         }
         if math.hasLimits {
             return SobraFigures(title: "Sobra do mês", amount: math.sobra, baseline: math.totalLimit, spent: math.spentInLimited,
-                                counted: math.limitedMovements, previous: [], caption: nil)
+                                counted: math.limitedMovements, previous: [], caption: nil, captionSymbol: "chart.pie")
         }
         return SobraFigures(title: "Gasto no ciclo", amount: math.totalSpent, baseline: nil, spent: math.totalSpent,
                             counted: math.movements, previous: previousSpending,
-                            caption: sobraMode == .income ? "Marque seu salário para ver quanto sobra" : nil)
+                            caption: sobraMode == .income ? "Marque seu salário para ver quanto sobra" : nil, captionSymbol: "briefcase")
     }
 }
 
@@ -108,6 +115,7 @@ private struct SobraFigures {
     let counted: [Movement]
     let previous: [Movement]
     let caption: String?
+    let captionSymbol: String
 
     var isSobra: Bool { baseline != nil }
 }
@@ -142,7 +150,7 @@ private struct SobraHero: View {
             .padding(.top, 4)
 
             if let caption = figures.caption {
-                Label(caption, systemImage: "briefcase")
+                Label(caption, systemImage: figures.captionSymbol)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .padding(.top, 6)
@@ -171,7 +179,9 @@ private struct SobraHero: View {
 
     @ViewBuilder
     private func status(previousAtSamePoint: Int64?) -> some View {
-        if let baseline = figures.baseline {
+        if figures.isSobra, figures.amount.cents < 0 {
+            StatusLine(text: "\(figures.amount.magnitude.formattedWhole) acima — segure os gastos até \(paydayText)", ahead: true)
+        } else if let baseline = figures.baseline {
             let delta = cycle.paceDelta(spent: figures.spent, of: baseline)
             let ahead = delta > 0.05
             let amount = Money(cents: Int64(abs(delta) * Double(baseline.cents)))
@@ -185,9 +195,11 @@ private struct SobraHero: View {
                            : "\(difference.magnitude.formattedWhole) \(ahead ? "a mais" : "a menos") que no ciclo anterior até aqui",
                        ahead: ahead)
         } else {
-            StatusLine(text: "Defina limites em Categorias para acompanhar o ritmo", ahead: false)
+            StatusLine(text: "Defina um teto em Ajustes ou limites em Categorias", ahead: false)
         }
     }
+
+    private var paydayText: String { cycle.end.formatted(.dateTime.day().month(.abbreviated).locale(Money.brazil)) }
 
     private var perDay: Money { Money(cents: max(figures.amount.cents, 0) / Int64(cycle.daysRemaining())) }
 
