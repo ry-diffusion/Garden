@@ -51,9 +51,7 @@ private struct HomeContent: View {
                 SobraHero(figures: figures(math), cycle: cycle)
 
                 if reviewCount > 0 {
-                    NavigationLink {
-                        ReviewView()
-                    } label: {
+                    NavigationLink(value: Route.review) {
                         ReviewCard(count: reviewCount)
                     }
                     .buttonStyle(.plain)
@@ -339,9 +337,7 @@ private struct RecentSection: View {
             }
             .padding(.bottom, 8)
             ForEach(movements) { movement in
-                NavigationLink {
-                    MovementDetailView(movement: movement)
-                } label: {
+                NavigationLink(value: movement) {
                     MovementRowContent(movement: movement)
                         .padding(.vertical, 6)
                 }

@@ -54,13 +54,7 @@ private struct CategoriesContent: View {
             } else {
                 Section("Neste ciclo") {
                     ForEach(lines) { line in
-                        NavigationLink {
-                            if let category = line.category {
-                                CategoryDetailView(category: category, cycle: cycle)
-                            } else {
-                                UncategorizedView(cycle: cycle)
-                            }
-                        } label: {
+                        NavigationLink(value: line.category.map(Route.category) ?? Route.uncategorized) {
                             CategoryLineRow(line: line, share: share(line, of: math.totalSpent), pace: cycle.elapsedFraction())
                         }
                         .navigationLinkIndicatorVisibility(.hidden)
@@ -74,9 +68,7 @@ private struct CategoriesContent: View {
             if !others.isEmpty {
                 Section {
                     ForEach(others) { category in
-                        NavigationLink {
-                            CategoryDetailView(category: category, cycle: cycle)
-                        } label: {
+                        NavigationLink(value: Route.category(category)) {
                             Label(category.name, systemImage: category.symbol)
                                 .foregroundStyle(.primary)
                         }
@@ -231,7 +223,7 @@ struct CategoryDetailView: View {
                     Text("Nenhum gasto ainda").foregroundStyle(.secondary)
                 }
                 ForEach(movements) { movement in
-                    NavigationLink { MovementDetailView(movement: movement) } label: {
+                    NavigationLink(value: movement) {
                         MovementRowContent(movement: movement, showsCategory: false)
                     }
                 }
@@ -261,7 +253,7 @@ struct CategoryDetailView: View {
 }
 
 /// Spending without a category — the list to work through.
-private struct UncategorizedView: View {
+struct UncategorizedView: View {
     let cycle: PayCycle
     @Query(sort: \Movement.date, order: .reverse) private var movements: [Movement]
 
@@ -272,6 +264,5 @@ private struct UncategorizedView: View {
             }
         }
         .navigationTitle("Sem categoria")
-        .navigationDestination(for: Movement.self) { MovementDetailView(movement: $0) }
     }
 }

@@ -58,7 +58,6 @@ struct MovementList: View {
         #if os(iOS)
         .listSectionSpacing(.compact)
         #endif
-        .navigationDestination(for: Movement.self) { MovementDetailView(movement: $0) }
         .refreshable { await SyncEngine.shared.sync() }
     }
 

@@ -66,7 +66,6 @@ struct ReviewView: View {
             }
         }
         .navigationTitle("Pra conferir")
-        .navigationDestination(for: Movement.self) { MovementDetailView(movement: $0) }
         .sensoryFeedback(.success, trigger: acceptedCount)
     }
 

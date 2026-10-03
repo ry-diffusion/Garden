@@ -11,19 +11,19 @@ struct RootView: View {
         @Bindable var router = router
         TabView(selection: $router.tab) {
             Tab("Início", systemImage: "leaf", value: AppTab.home) {
-                NavigationStack { HomeView() }
+                NavigationStack { HomeView().gardenDestinations() }
             }
             Tab("Extrato", systemImage: "list.bullet.rectangle", value: AppTab.movements) {
-                NavigationStack { MovementsView() }
+                NavigationStack { MovementsView().gardenDestinations() }
             }
             Tab("Categorias", systemImage: "chart.pie", value: AppTab.planning) {
-                NavigationStack { CategoriesView() }
+                NavigationStack { CategoriesView().gardenDestinations() }
             }
             Tab("Patrimônio", systemImage: "banknote", value: AppTab.money) {
-                NavigationStack { MoneyView() }
+                NavigationStack { MoneyView().gardenDestinations() }
             }
             Tab("Buscar", systemImage: "magnifyingglass", value: AppTab.search, role: .search) {
-                NavigationStack { SearchView() }
+                NavigationStack { SearchView().gardenDestinations() }
             }
         }
         .tabViewStyle(.sidebarAdaptable)

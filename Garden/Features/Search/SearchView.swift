@@ -37,7 +37,6 @@ struct SearchView: View {
             }
         }
         .navigationTitle("Buscar")
-        .navigationDestination(for: Movement.self) { MovementDetailView(movement: $0) }
         .searchable(text: $query, prompt: "Estabelecimento, pessoa, categoria…")
         .task(id: query) {
             if query.isEmpty {
